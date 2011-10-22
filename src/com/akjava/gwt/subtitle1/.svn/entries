@@ -1,0 +1,34 @@
+8
+
+dir
+29
+svn://localhost/datas/GWT_Subtitle1/src/com/akjava/gwt/subtitle1
+svn://localhost
+
+
+
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+
+svn:special svn:externals svn:needs-lock
+
+Main.gwt.xml
+file
+
+
+
+
+2008-12-18T08:43:25.448000Z
+052a478a80b904d45503a3902f0f405f
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+client
+dir
+
+public
+dir
+

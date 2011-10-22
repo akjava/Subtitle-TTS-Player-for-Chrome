@@ -1,0 +1,76 @@
+8
+
+dir
+29
+svn://localhost/datas/GWT_Subtitle1/src/com/akjava/gwt/subtitle1/client
+svn://localhost
+
+
+
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+
+svn:special svn:externals svn:needs-lock
+
+MessagesConstants.properties
+file
+39
+
+
+
+2009-01-04T19:56:08.155000Z
+a0dd6e46cb4ffc140e7e680eb43437c1
+2009-01-04T20:34:39.543000Z
+39
+akito
+
+Main.java
+file
+39
+
+
+
+2009-01-04T20:06:20.325000Z
+91f2877cdf2d40341c27b89fda33a63f
+2009-01-04T20:34:39.543000Z
+39
+akito
+
+MessagesConstants.java
+file
+39
+
+
+
+2009-01-04T19:56:29.299000Z
+30fa516d6db0523730f2d9e50721d95a
+2009-01-04T20:34:39.543000Z
+39
+akito
+
+CenterCinfirmDialog.java
+file
+
+
+
+
+2008-11-09T11:59:51.034000Z
+8823b07854a30eb2c32134658bdc744a
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+MessagesConstants_ja.properties
+file
+39
+
+
+
+2009-01-04T20:07:38.899000Z
+b741b41563865cf409e359e3417d4f4d
+2009-01-04T20:34:39.543000Z
+39
+akito
+

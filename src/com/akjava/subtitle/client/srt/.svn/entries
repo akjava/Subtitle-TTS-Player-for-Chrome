@@ -1,0 +1,64 @@
+8
+
+dir
+29
+svn://localhost/datas/GWT_Subtitle1/src/com/akjava/subtitle/client/srt
+svn://localhost
+
+
+
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+
+svn:special svn:externals svn:needs-lock
+
+SRTObject.java
+file
+
+
+
+
+2008-10-30T10:03:34.886000Z
+af008f26be6732c8066356b6af213dbb
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+SRTList.java
+file
+
+
+
+
+2008-11-09T16:35:58.352000Z
+e744f5504e1341d84cc8e5edd6290168
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+SRTParser.java
+file
+
+
+
+
+2008-10-30T08:36:13.933000Z
+48e61b518a8fb0c01f15c20a51166356
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+TimeData.java
+file
+
+
+
+
+2008-10-30T09:46:00.868000Z
+a31246065ee3ec0affebb761100dbd31
+2008-12-30T18:45:57.853400Z
+29
+akito
+

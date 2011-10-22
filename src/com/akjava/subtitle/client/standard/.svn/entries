@@ -1,0 +1,76 @@
+8
+
+dir
+29
+svn://localhost/datas/GWT_Subtitle1/src/com/akjava/subtitle/client/standard
+svn://localhost
+
+
+
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+
+svn:special svn:externals svn:needs-lock
+
+TimeBaseFileObject.java
+file
+
+
+
+
+2008-10-29T22:53:12.381534Z
+3e4d13cf41901ccdefb396d4aaa3979c
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+StandardSubObject.java
+file
+
+
+
+
+2008-10-29T22:53:12.336534Z
+85ac95f069ccd9f79f26ba294f77f56a
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+TimeParameterObject.java
+file
+
+
+
+
+2008-10-29T22:53:12.186534Z
+e7ca861a81ce28fdc07ec9658a25d4ed
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+ParameterObject.java
+file
+
+
+
+
+2008-10-29T22:53:12.231534Z
+be6af2507c049e9f7b35b8695d577581
+2008-12-30T18:45:57.853400Z
+29
+akito
+
+SubUtils.java
+file
+
+
+
+
+2008-10-30T08:38:06.395000Z
+51749d7cd9ca27dfc41498988e5dc5b0
+2008-12-30T18:45:57.853400Z
+29
+akito
+
