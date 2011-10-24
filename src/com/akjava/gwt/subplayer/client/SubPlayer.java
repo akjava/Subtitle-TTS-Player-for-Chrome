@@ -1,5 +1,6 @@
 package com.akjava.gwt.subplayer.client;
 
+import com.akjava.gwt.subplayer.client.resources.Binder;
 import com.akjava.subtitle.client.srt.SRTList;
 import com.akjava.subtitle.client.srt.SRTObject;
 import com.akjava.subtitle.client.srt.SRTParser;
@@ -8,13 +9,20 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -28,18 +36,46 @@ public class SubPlayer implements EntryPoint {
 	private LoadPanel loadPanel;
 	@Override
 	public void onModuleLoad() {
-	
+		//pre load resource
+		ImageResource icon=Binder.INSTANCE.loadanime();
+		loadImg = new Image(icon);
+		loadImg.setVisible(false);
+		loadImg.addLoadHandler(new LoadHandler() {
+			
+			@Override
+			public void onLoad(LoadEvent event) {
+				RootPanel.get().remove(loadImg);
+				loadImg.setVisible(true);
+			}
+		});
+		RootPanel.get().add(loadImg);
+		
+		preference = new SubPlayerPreference();
+		preference.initialize();
+		
+		
+		
 		tab = new TabLayoutPanel(1.5, Unit.EM);
+		tab.setHeight("550px");
 		
 		VerticalPanel root=new VerticalPanel();
 		root.setWidth("100%");
+		root.setHeight("100%");
 		//root.setHeight("200px");
 		RootLayoutPanel.get().add(tab);
 		 tab.add(root, "PLAY");
 		 
+		 noSubtitle = new Label("Subtitle is empty.load from Load tab");
+		 noSubtitle.setStyleName("nosubtitle");
+		 root.add(noSubtitle);
+		 
+		 
 		 loadPanel = new LoadPanel();
 		 loadPanel.setWidth("100%");
+		 loadPanel.setHeight("100%");
 		 tab.add(loadPanel, "LOAD");
+		 tab.selectTab(1);
+		 loadPanel.setText(preference.getSrtText());
 		
 		itemPanel = new VerticalPanel();
 		itemPanel.setSpacing(8);
@@ -91,6 +127,10 @@ public class SubPlayer implements EntryPoint {
 			
 			@Override
 			public void onClick(ClickEvent event) {
+			if(itemPanel.getWidgetCount()==0){
+					return;
+				}
+				
 			index++;
 			if(index>=itemPanel.getWidgetCount()){
 				index=0;
@@ -117,6 +157,10 @@ public class SubPlayer implements EntryPoint {
 				setlectWidget((Widget) event.getSource());
 			}
 		};
+		
+		
+		//load data from preferences
+		//if empty load mode.
 	}
 	
 	public class SRTItemPanel extends FocusPanel{
@@ -130,6 +174,9 @@ public class SubPlayer implements EntryPoint {
 	
 	ClickHandler selectWidgetHandler;
 	private TabLayoutPanel tab;
+	private Label noSubtitle;
+	private SubPlayerPreference preference;
+	private Image loadImg;
 	
 	public class LoadPanel extends VerticalPanel{
 		private TextArea textArea;
@@ -171,30 +218,86 @@ public class SubPlayer implements EntryPoint {
 		public String getText(){
 			return textArea.getText();
 		}
+		public void setText(String text){
+			textArea.setText(text);
+		}
 		
 		
 	}
 	
 	private void clearSrt() {
-		// TODO Auto-generated method stub
+		loadPanel.setText("");
+		itemPanel.clear();
+		initPlayerSettings();
 		
+		preference.setSrtText("");
+		
+		
+		updateNoSubtitleLabel();
 	}
 	
 	
 	
-	private void loadSrt() {
-		String text=loadPanel.getText();
-		SRTParser parser=new SRTParser();
-		SRTList list=parser.parse(text.split("\n"));
-		itemPanel.clear();
-		for(int i=0;i<list.size();i++){
-			SRTObject srt=list.getSRTObjectAt(i);
-			SRTItemPanel panel=new SRTItemPanel(srt);
-			panel.addClickHandler(selectWidgetHandler);
-			itemPanel.add(panel);
+	private void updateNoSubtitleLabel(){
+		if(itemPanel.getWidgetCount()>0){
+			noSubtitle.setVisible(false);
+		}else{
+			noSubtitle.setVisible(true);
 		}
-		initPlayerSettings();
-		tab.selectTab(0);
+	}
+	
+	
+	private void loadSrt() {
+		final String text=loadPanel.getText();
+		
+		
+		
+		
+		final DialogBox dialog=new DialogBox();
+		
+		//dialog.setSize("200px", "200px");
+		dialog.setText("Subtitle Parsing");
+		//GWT.log(loadImg.getUrl());
+		//loadImg.setVisible(true);
+		VerticalPanel vpanel=new VerticalPanel();
+		//Image img=new Image("../img/loadanime.gif");
+		//GWT.log(img.getUrl());
+		//loadImg.setVisible(true);
+		vpanel.add(loadImg);
+		dialog.setWidget(vpanel);
+		dialog.setModal(true);
+		dialog.setGlassEnabled(true);
+		dialog.show();
+		dialog.center();
+		
+		Timer timer=new Timer(){
+
+			@Override
+			public void run() {
+			
+				SRTParser parser=new SRTParser();
+				SRTList list=parser.parse(text.split("\n"));
+				dialog.hide();
+				
+				if(list.size()>0){
+					preference.setSrtText(text);
+					preference.setSrtSelectIndex(0);
+					index=0;
+				}
+				itemPanel.clear();
+				for(int i=0;i<list.size();i++){
+					SRTObject srt=list.getSRTObjectAt(i);
+					SRTItemPanel panel=new SRTItemPanel(srt);
+					panel.addClickHandler(selectWidgetHandler);
+					itemPanel.add(panel);
+				}
+				initPlayerSettings();
+				tab.selectTab(0);
+				//label mode
+				updateNoSubtitleLabel();
+			}};
+			timer.schedule(100);
+		
 	}
 	
 	private void initPlayerSettings(){

@@ -45,7 +45,7 @@ public SRTList parse(String[] lines){
 			    	}
 			    	//log.info("ignore:"+line);
 			    }else{
-			    	System.out.println("headerText:"+headerLine.length());
+			    	//System.out.println("headerText:"+headerLine.length());
 			    	if(headerLine.length()>=2){
 			    	
 			    		//header only subs;
@@ -100,7 +100,7 @@ public SRTList parse(String[] lines){
 					headerLine="";
 					}
 				}else{
-					System.out.println("not empty:'"+line+"'");
+				//	System.out.println("not empty:'"+line+"'");
 					String text=srtObject.getText();
 					if(text==null){
 						text=headerLine+line;	//now support start with empty
