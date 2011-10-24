@@ -167,8 +167,15 @@ public class SubPlayer implements EntryPoint {
 		SRTObject srt;
 	public SRTItemPanel(SRTObject srt){
 		this.srt=srt;
+		HorizontalPanel hpanel=new HorizontalPanel();
+		hpanel.setSpacing(2);
+		hpanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+		hpanel.add(new Button("PLAY"));
 		HTMLPanel html=new HTMLPanel(srt.getText().replace("\n", "<br/>"));
-		setWidget(html);
+		
+		hpanel.add(html);
+		
+		setWidget(hpanel);
 	}
 	}
 	
