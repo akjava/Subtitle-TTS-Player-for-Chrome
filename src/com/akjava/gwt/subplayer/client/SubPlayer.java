@@ -1,7 +1,7 @@
 package com.akjava.gwt.subplayer.client;
 
 import com.akjava.gwt.subplayer.client.resources.Binder;
-import com.akjava.gwt.subplayer.client.ui.RangeSlider;
+import com.akjava.gwt.subplayer.client.ui.HTML5InputRange;
 import com.akjava.subtitle.client.srt.SRTList;
 import com.akjava.subtitle.client.srt.SRTObject;
 import com.akjava.subtitle.client.srt.SRTParser;
@@ -394,7 +394,7 @@ public class SubPlayer implements EntryPoint,SubContainer {
 			
 			rateValue=new Label();
 			add(rateValue);
-			final RangeSlider range=new RangeSlider(1, 50, 10);
+			final HTML5InputRange range=new HTML5InputRange(1, 50, 10);
 			range.addMouseUpHandler(new MouseUpHandler() {
 				@Override
 				public void onMouseUp(MouseUpEvent event) {
@@ -402,7 +402,16 @@ public class SubPlayer implements EntryPoint,SubContainer {
 				}
 			});
 			add(range);
+			Button bt=new Button("test");
+			bt.addClickHandler(new ClickHandler() {
+				
+				@Override
+				public void onClick(ClickEvent event) {
+					range.setValue(20);
+				}
 			
+			});
+			add(bt);
 		}
 		
 	}

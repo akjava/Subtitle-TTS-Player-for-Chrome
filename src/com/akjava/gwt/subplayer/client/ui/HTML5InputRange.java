@@ -4,9 +4,9 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.FocusWidget;
 
-public class RangeSlider extends FocusWidget{
+public class HTML5InputRange extends FocusWidget{
 
-	public RangeSlider(int min,int max,int current){
+	public HTML5InputRange(int min,int max,int current){
 		super(RangeElement.createRangeElement(Document.get(),min,max,current));
 	}
 	 protected RangeElement getRangeElement() {
