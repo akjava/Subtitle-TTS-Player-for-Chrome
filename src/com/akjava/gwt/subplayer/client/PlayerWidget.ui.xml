@@ -5,12 +5,12 @@
 		
 	</ui:style>
 	<g:HTMLPanel>
-<g:HorizontalPanel ui:field="controler" >
+<g:HorizontalPanel ui:field="controler" verticalAlignment="MIDDLE">
 	<g:Label ui:field="index">index</g:Label>
 	<g:Button ui:field="first">first</g:Button>
 	<g:Button ui:field="prev">prev</g:Button>
-	<g:Button ui:field="play">play</g:Button>
 	<g:Button ui:field="next">next</g:Button>
+	<g:Button ui:field="play">play</g:Button>
 	<g:Button ui:field="auto">auto</g:Button>
 	<g:Button ui:field="stop">stop</g:Button>
 </g:HorizontalPanel>

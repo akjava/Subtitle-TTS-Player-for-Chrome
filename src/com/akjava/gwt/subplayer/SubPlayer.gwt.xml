@@ -6,4 +6,5 @@
 	<inherits name="com.google.gwt.user.User" />
 	<source path="client" />
 	<entry-point class="com.akjava.gwt.subplayer.client.SubPlayer" />
+	-property name="user.agent" value="safari"/>
 </module>

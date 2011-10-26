@@ -16,18 +16,32 @@ public class PlayerWidget extends Composite {
 	interface PlayerWidgetUiBinder extends UiBinder<Widget, PlayerWidget> {
 	}
 
-	public PlayerWidget() {
+	private SubContainer container;
+	public PlayerWidget(SubContainer container) {
 		initWidget(uiBinder.createAndBindUi(this));
+		this.container=container;
+		updateButtons();
 	}
 	
 	private int subIndex;
 	private int subLength;
+private boolean autoPlaying;	
+public boolean isAutoPlaying() {
+	return autoPlaying;
+}
+
+public void setAutoPlaying(boolean autoPlaying) {
+	this.autoPlaying = autoPlaying;
+	updateButtons();
+}
+
 public int getSubLength() {
 		return subLength;
 	}
 
 	public void setSubLength(int subLength) {
 		this.subLength = subLength;
+		updateButtons();
 	}
 
 public int getSubIndex() {
@@ -41,7 +55,7 @@ public int getSubIndex() {
 
 @UiField HorizontalPanel controler;
 @UiField Label index;
-@UiField Button first,prev,play,stop,next;
+@UiField Button first,prev,play,stop,next,auto;
 
 	
 public HorizontalPanel getControler(){
@@ -57,6 +71,7 @@ return first;
 }
 
 public Button getPrev(){
+
 return prev;
 }
 
@@ -73,26 +88,94 @@ return next;
 }
 
 
-	
+public boolean hasNext(){
+	return subIndex<subLength-1;
+}
+public void doNext(){
+	int tmp=subIndex+1;
+	if(tmp>=subLength){
+		tmp=subLength-1;	
+	}
+	subIndex=tmp;
+	container.moveTo(subIndex);
+	updateButtons();
+}
+
+private void doFirst(){
+	subIndex=0;
+	container.moveTo(subIndex);
+	updateButtons();	
+}
+
 @UiHandler("first")
 void clickFirst(ClickEvent e) {
-
+	doFirst();
 }
 @UiHandler("prev")
 void clickPrev(ClickEvent e) {
-
+	int tmp=subIndex-1;
+	if(tmp<0){
+		tmp=0;
+	}
+	subIndex=tmp;
+	container.moveTo(subIndex);
+	updateButtons();
 }
 @UiHandler("play")
 void clickPlay(ClickEvent e) {
-
+container.play(subIndex);
 }
 @UiHandler("stop")
 void clickStop(ClickEvent e) {
-
+container.stop();
 }
 @UiHandler("next")
 void clickNext(ClickEvent e) {
+doNext();
+}
+@UiHandler("auto")
+void clickAuto(ClickEvent e) {
+setAutoPlaying(true);
+container.autoPlay(subIndex);
+}
 
+public void endAutoPlay(){
+	setAutoPlaying(false);
+	//doFirst(); //there are first button and sometime need to check last talking words
+}
+
+private void updateButtons(){
+	if(!autoPlaying){
+	if(subLength==0 || subIndex>=subLength-1){
+		next.setEnabled(false);
+	}else{
+		next.setEnabled(true);
+	}
+	if(subLength==0 ||subIndex==0){
+		prev.setEnabled(false);
+	}else{
+		prev.setEnabled(true);
+	}
+	
+	if(subLength==0){
+		first.setEnabled(false);
+		play.setEnabled(false);
+		stop.setEnabled(false);
+		auto.setEnabled(false);
+	}else{
+		first.setEnabled(true);
+		play.setEnabled(true);
+		stop.setEnabled(true);
+		auto.setEnabled(true);
+	}
+	}else{
+		first.setEnabled(false);
+		prev.setEnabled(false);
+		next.setEnabled(false);
+		play.setEnabled(false);
+		stop.setEnabled(true);
+		auto.setEnabled(false);	
+	}
 }
 
 

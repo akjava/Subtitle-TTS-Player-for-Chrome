@@ -1,6 +1,7 @@
 package com.akjava.gwt.subplayer.client;
 
 import com.akjava.gwt.subplayer.client.resources.Binder;
+import com.akjava.gwt.subplayer.client.ui.RangeSlider;
 import com.akjava.subtitle.client.srt.SRTList;
 import com.akjava.subtitle.client.srt.SRTObject;
 import com.akjava.subtitle.client.srt.SRTParser;
@@ -11,6 +12,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
@@ -29,7 +32,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SubPlayer implements EntryPoint {
+public class SubPlayer implements EntryPoint,SubContainer {
 
 	
 	private VerticalPanel itemPanel;
@@ -80,10 +83,10 @@ public class SubPlayer implements EntryPoint {
 		itemPanel = new VerticalPanel();
 		itemPanel.setSpacing(8);
 		
-		final ScrollPanel scroll=new ScrollPanel(itemPanel);
-		scroll.setWidth("100%");
-		scroll.setHeight("400px");
-		root.add(scroll);
+		itemPanelScroll = new ScrollPanel(itemPanel);
+		itemPanelScroll.setWidth("100%");
+		itemPanelScroll.setHeight("400px");
+		root.add(itemPanelScroll);
 		
 		/*
 		for(int i=0;i<5;i++){
@@ -109,38 +112,15 @@ public class SubPlayer implements EntryPoint {
 		
 
 		
-		Button next=new Button("next");
-		root.add(next);
-		next.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-			if(itemPanel.getWidgetCount()==0){
-					return;
-				}
-				
-			int tmp=playerWidget.getSubIndex();
-			tmp++;
-			if(tmp>=itemPanel.getWidgetCount()){
-				
-				playerWidget.setSubIndex(0);
-			}else{
-				playerWidget.setSubIndex(tmp);
-			}
-			int sat=calculateScrollY(playerWidget.getSubIndex());
-			GWT.log("scroll:"+sat);
-			scroll.setVerticalScrollPosition(sat);
-			
-			unselectAll();
-			setlectWidget(itemPanel.getWidget(playerWidget.getSubIndex()));
-			}
-		});
 		
-		playerWidget = new PlayerWidget();
+		
+		playerWidget = new PlayerWidget(this);
 		root.add(playerWidget);
 		
 		DisclosurePanel ds=new DisclosurePanel("show subtitle time [start] - [end]");
-		ds.add(new Label("0:0:0 - 0:0:12"));
+		timeLabel = new Label();
+		ds.add(timeLabel);
+		//ds.add(new Label("0:0:0 - 0:0:12"));
 		root.add(ds);
 		
 		selectWidgetHandler=new ClickHandler() {
@@ -152,6 +132,8 @@ public class SubPlayer implements EntryPoint {
 			}
 		};
 		
+		VoiceSettings voiceSettings=new VoiceSettings();
+		root.add(voiceSettings);
 		
 		//load data from preferences
 		//if empty load mode.
@@ -159,6 +141,9 @@ public class SubPlayer implements EntryPoint {
 	
 	public class SRTItemPanel extends FocusPanel{
 		SRTObject srt;
+	public SRTObject getSrt() {
+			return srt;
+		}
 	public SRTItemPanel(SRTObject srt){
 		this.srt=srt;
 		HorizontalPanel hpanel=new HorizontalPanel();
@@ -179,6 +164,8 @@ public class SubPlayer implements EntryPoint {
 	private SubPlayerPreference preference;
 	private Image loadImg;
 	private PlayerWidget playerWidget;
+	private ScrollPanel itemPanelScroll;
+	private Label timeLabel;
 	
 	public class LoadPanel extends VerticalPanel{
 		private TextArea textArea;
@@ -197,7 +184,8 @@ public class SubPlayer implements EntryPoint {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				loadSrt();
+				loadSrt(0);
+				
 			}
 		});
 		bcontrol.add(load);
@@ -235,12 +223,12 @@ public class SubPlayer implements EntryPoint {
 		preference.setSrtText("");
 		
 		
-		updateNoSubtitleLabel();
+		updateNoSubtitleWarning();
 	}
 	
 	
 	
-	private void updateNoSubtitleLabel(){
+	private void updateNoSubtitleWarning(){
 		if(itemPanel.getWidgetCount()>0){
 			noSubtitle.setVisible(false);
 		}else{
@@ -249,7 +237,7 @@ public class SubPlayer implements EntryPoint {
 	}
 	
 	
-	private void loadSrt() {
+	private void loadSrt(final int selectIndex) {
 		final String text=loadPanel.getText();
 		
 		
@@ -295,9 +283,10 @@ public class SubPlayer implements EntryPoint {
 					itemPanel.add(panel);
 				}
 				initPlayerSettings();
-				tab.selectTab(0);
+				tab.selectTab(0);//switch to view
 				//label mode
-				updateNoSubtitleLabel();
+				updateNoSubtitleWarning();
+				selectWidget(selectIndex);
 			}};
 			timer.schedule(100);
 		
@@ -307,10 +296,20 @@ public class SubPlayer implements EntryPoint {
 		playerWidget.setSubIndex(0);
 	}
 	
+	private void selectWidget(int index){
+		if(index<itemPanel.getWidgetCount()){
+			Widget widget=itemPanel.getWidget(index);
+			setlectWidget(widget);
+		}
+	}
+	
 	private void setlectWidget(Widget widget){
 		widget.addStyleName("select");
 		int ind=itemPanel.getWidgetIndex(widget);
 		playerWidget.setSubIndex(ind);
+		SRTItemPanel srtItem=(SRTItemPanel) widget;
+		SRTObject srt=srtItem.getSrt();
+		timeLabel.setText(srt.getStartTime().toString()+" - "+srt.getEndTime().toString());
 	}
 	private void unselectAll(){
 		for(int i=0;i<itemPanel.getWidgetCount();i++){
@@ -325,6 +324,87 @@ public class SubPlayer implements EntryPoint {
 			scroll+=itemPanel.getSpacing();
 		}
 		return scroll;
+	}
+
+
+	
+	
+
+	private Timer tmpTimer;
+	@Override
+	public void autoPlay(int index) {
+		//TODO remove test
+		tmpTimer = new Timer(){
+			@Override
+			public void run() {
+				endPlay();
+			}};
+			tmpTimer.scheduleRepeating(3000);
+			
+		play(index);	
+	}
+
+
+	private void endPlay(){
+		if(playerWidget.hasNext()){
+			playerWidget.doNext();
+			play(playerWidget.getSubIndex());
+		}else{
+			//TODO remove
+			tmpTimer.cancel();
+			playerWidget.endAutoPlay();
+		}
+	}
+
+	@Override
+	public void moveTo(int index) {
+		
+		int sat=calculateScrollY(index);
+		GWT.log("scroll:"+sat);
+		itemPanelScroll.setVerticalScrollPosition(sat);
+		
+		unselectAll();
+		setlectWidget(itemPanel.getWidget(index));
+	}
+
+
+
+	@Override
+	public void play(int index) {
+		// TODO call tts
+		if(playerWidget.isAutoPlaying()){
+			//do something
+			//catch TYPE:interrupted or TYPE:end call endPlay()
+		}
+	}
+
+
+
+	@Override
+	public void stop() {
+		playerWidget.setAutoPlaying(false);
+		
+		//TODO call tts
+		
+	}
+	
+	public class VoiceSettings extends VerticalPanel{
+		Label rateValue;
+		public VoiceSettings(){
+			
+			rateValue=new Label();
+			add(rateValue);
+			final RangeSlider range=new RangeSlider(1, 50, 10);
+			range.addMouseUpHandler(new MouseUpHandler() {
+				@Override
+				public void onMouseUp(MouseUpEvent event) {
+					rateValue.setText(""+range.getValue());
+				}
+			});
+			add(range);
+			
+		}
+		
 	}
 
 }
