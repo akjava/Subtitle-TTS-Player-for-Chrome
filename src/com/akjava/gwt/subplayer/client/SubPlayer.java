@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SubPlayer implements EntryPoint {
 
-	private int index=0;
+	
 	private VerticalPanel itemPanel;
 	private LoadPanel loadPanel;
 	@Override
@@ -107,19 +107,7 @@ public class SubPlayer implements EntryPoint {
 		
 		}*/
 		
-		Button bt=new Button("check");
-		root.add(bt);
-		bt.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-			int csize=itemPanel.getWidgetCount();	
-			for(int i=0;i<csize;i++){
-				Widget widget=itemPanel.getWidget(i);
-				GWT.log("item:"+i+","+widget.getAbsoluteLeft()+","+widget.getAbsoluteTop()+","+widget.getOffsetHeight());
-				}
-			}
-		});
+
 		
 		Button next=new Button("next");
 		root.add(next);
@@ -131,21 +119,27 @@ public class SubPlayer implements EntryPoint {
 					return;
 				}
 				
-			index++;
-			if(index>=itemPanel.getWidgetCount()){
-				index=0;
+			int tmp=playerWidget.getSubIndex();
+			tmp++;
+			if(tmp>=itemPanel.getWidgetCount()){
+				
+				playerWidget.setSubIndex(0);
+			}else{
+				playerWidget.setSubIndex(tmp);
 			}
-			int sat=calculateScrollY(index);
+			int sat=calculateScrollY(playerWidget.getSubIndex());
 			GWT.log("scroll:"+sat);
 			scroll.setVerticalScrollPosition(sat);
 			
 			unselectAll();
-			setlectWidget(itemPanel.getWidget(index));
+			setlectWidget(itemPanel.getWidget(playerWidget.getSubIndex()));
 			}
 		});
 		
+		playerWidget = new PlayerWidget();
+		root.add(playerWidget);
 		
-		DisclosurePanel ds=new DisclosurePanel("show subtitle time start - end");
+		DisclosurePanel ds=new DisclosurePanel("show subtitle time [start] - [end]");
 		ds.add(new Label("0:0:0 - 0:0:12"));
 		root.add(ds);
 		
@@ -184,6 +178,7 @@ public class SubPlayer implements EntryPoint {
 	private Label noSubtitle;
 	private SubPlayerPreference preference;
 	private Image loadImg;
+	private PlayerWidget playerWidget;
 	
 	public class LoadPanel extends VerticalPanel{
 		private TextArea textArea;
@@ -286,10 +281,11 @@ public class SubPlayer implements EntryPoint {
 				SRTList list=parser.parse(text.split("\n"));
 				dialog.hide();
 				
+				playerWidget.setSubLength(list.size());
 				if(list.size()>0){
 					preference.setSrtText(text);
 					preference.setSrtSelectIndex(0);
-					index=0;
+					playerWidget.setSubIndex(0);
 				}
 				itemPanel.clear();
 				for(int i=0;i<list.size();i++){
@@ -308,11 +304,13 @@ public class SubPlayer implements EntryPoint {
 	}
 	
 	private void initPlayerSettings(){
-		index=0;
+		playerWidget.setSubIndex(0);
 	}
 	
 	private void setlectWidget(Widget widget){
 		widget.addStyleName("select");
+		int ind=itemPanel.getWidgetIndex(widget);
+		playerWidget.setSubIndex(ind);
 	}
 	private void unselectAll(){
 		for(int i=0;i<itemPanel.getWidgetCount();i++){
