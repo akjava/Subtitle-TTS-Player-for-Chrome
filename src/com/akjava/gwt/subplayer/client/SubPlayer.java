@@ -1,5 +1,16 @@
 package com.akjava.gwt.subplayer.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.akjava.gwt.chrometts.client.ChromeTts;
+import com.akjava.gwt.chrometts.client.TtsEvent;
+import com.akjava.gwt.chrometts.client.TtsOption;
+import com.akjava.gwt.chrometts.client.TtsVoice;
+import com.akjava.gwt.chrometts.client.ChromeTts.GetVoiceHandler;
+import com.akjava.gwt.chrometts.client.ChromeTts.SpeakHandler;
+import com.akjava.gwt.chrometts.client.ChromeTts.TtsEventHandler;
 import com.akjava.gwt.subplayer.client.resources.Binder;
 import com.akjava.gwt.subplayer.client.ui.HTML5InputRange;
 import com.akjava.subtitle.client.srt.SRTList;
@@ -7,6 +18,7 @@ import com.akjava.subtitle.client.srt.SRTObject;
 import com.akjava.subtitle.client.srt.SRTParser;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -14,7 +26,10 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -29,6 +44,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -59,7 +75,7 @@ public class SubPlayer implements EntryPoint,SubContainer {
 		
 		
 		tab = new TabLayoutPanel(1.5, Unit.EM);
-		tab.setHeight("550px");
+		tab.setHeight("600px");
 		
 		VerticalPanel root=new VerticalPanel();
 		root.setWidth("100%");
@@ -131,9 +147,10 @@ public class SubPlayer implements EntryPoint,SubContainer {
 				setlectWidget((Widget) event.getSource());
 			}
 		};
-		
-		VoiceSettings voiceSettings=new VoiceSettings();
-		root.add(voiceSettings);
+		DisclosurePanel vs=new DisclosurePanel("Voice Settings");
+		root.add(vs);
+		voiceSettings = new VoiceSettings();
+		vs.add(voiceSettings);
 		
 		//load data from preferences
 		//if empty load mode.
@@ -149,7 +166,16 @@ public class SubPlayer implements EntryPoint,SubContainer {
 		HorizontalPanel hpanel=new HorizontalPanel();
 		hpanel.setSpacing(2);
 		hpanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
-		hpanel.add(new Button("PLAY"));
+		Button play=new Button("PLAY");
+		play.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				int index=itemPanel.getWidgetIndex(SRTItemPanel.this);
+				play(index);
+			}
+		});
+		hpanel.add(play);
 		HTMLPanel html=new HTMLPanel(srt.getText().replace("\n", "<br/>"));
 		
 		hpanel.add(html);
@@ -302,6 +328,12 @@ public class SubPlayer implements EntryPoint,SubContainer {
 			setlectWidget(widget);
 		}
 	}
+	private SRTItemPanel getSelectWidget(){
+		return (SRTItemPanel) itemPanel.getWidget(playerWidget.getSubIndex());
+	}
+	private SRTItemPanel getWidget(int index){
+		return (SRTItemPanel) itemPanel.getWidget(index);
+	}
 	
 	private void setlectWidget(Widget widget){
 		widget.addStyleName("select");
@@ -331,16 +363,9 @@ public class SubPlayer implements EntryPoint,SubContainer {
 	
 
 	private Timer tmpTimer;
+	private VoiceSettings voiceSettings;
 	@Override
-	public void autoPlay(int index) {
-		//TODO remove test
-		tmpTimer = new Timer(){
-			@Override
-			public void run() {
-				endPlay();
-			}};
-			tmpTimer.scheduleRepeating(3000);
-			
+	public void autoPlay(int index) {			
 		play(index);	
 	}
 
@@ -350,8 +375,6 @@ public class SubPlayer implements EntryPoint,SubContainer {
 			playerWidget.doNext();
 			play(playerWidget.getSubIndex());
 		}else{
-			//TODO remove
-			tmpTimer.cancel();
 			playerWidget.endAutoPlay();
 		}
 	}
@@ -360,7 +383,7 @@ public class SubPlayer implements EntryPoint,SubContainer {
 	public void moveTo(int index) {
 		
 		int sat=calculateScrollY(index);
-		GWT.log("scroll:"+sat);
+		
 		itemPanelScroll.setVerticalScrollPosition(sat);
 		
 		unselectAll();
@@ -369,12 +392,37 @@ public class SubPlayer implements EntryPoint,SubContainer {
 
 
 
+	TtsEventHandler eventHandler;
 	@Override
 	public void play(int index) {
 		// TODO call tts
+		
+		if(eventHandler==null){
+			eventHandler=new TtsEventHandler() {
+				@Override
+				public void event(TtsEvent event) {
+					if(event.getType().equals(TtsEvent.TYPE_END) || event.getType().equals(TtsEvent.TYPE_CANCELLED)
+							|| event.getType().equals(TtsEvent.TYPE_INTERRUPTED) || event.getType().equals(TtsEvent.TYPE_ERROR)
+					){
+						//
+						endPlay();
+					}
+				}
+			};
+		};
+		
+		
+		
+		if(ChromeTts.isAvaialbe()){
+		String text=getWidget(index).getSrt().getText();
+		TtsOption option=ChromeTts.options().rate(voiceSettings.getRate()).pitch(voiceSettings.getPitch()).voiceName(voiceSettings.getVoiceName());
+		
 		if(playerWidget.isAutoPlaying()){
-			//do something
-			//catch TYPE:interrupted or TYPE:end call endPlay()
+			option.onEvent(eventHandler);
+		}
+		
+		
+		ChromeTts.speak(text, option, null);
 		}
 	}
 
@@ -383,37 +431,140 @@ public class SubPlayer implements EntryPoint,SubContainer {
 	@Override
 	public void stop() {
 		playerWidget.setAutoPlaying(false);
-		
-		//TODO call tts
-		
+		ChromeTts.stop();
 	}
 	
 	public class VoiceSettings extends VerticalPanel{
 		Label rateValue;
+		private Label pitchValue;
+		private HTML5InputRange pitchRange;
+		private HTML5InputRange rateRange;
+		private ValueListBox<String> voiceNames;
 		public VoiceSettings(){
 			
-			rateValue=new Label();
-			add(rateValue);
-			final HTML5InputRange range=new HTML5InputRange(1, 50, 10);
-			range.addMouseUpHandler(new MouseUpHandler() {
+			voiceNames = new ValueListBox<String>(new Renderer<String>() {
+
 				@Override
-				public void onMouseUp(MouseUpEvent event) {
-					rateValue.setText(""+range.getValue());
+				public String render(String object) {
+					return object;
+				}
+
+				@Override
+				public void render(String object, Appendable appendable)
+						throws IOException {
 				}
 			});
-			add(range);
-			Button bt=new Button("test");
-			bt.addClickHandler(new ClickHandler() {
+			voiceNames.addValueChangeHandler(new ValueChangeHandler<String>() {
 				
 				@Override
-				public void onClick(ClickEvent event) {
-					range.setValue(20);
+				public void onValueChange(ValueChangeEvent<String> event) {
+					String value=event.getValue();
+					preference.setVoiceName(value);
 				}
-			
 			});
-			add(bt);
+			add(voiceNames);
+			updateVoiceNames();
+			
+			
+			HorizontalPanel voices=new HorizontalPanel();
+			add(voices);
+			voices.add(new Label("Voices:"));
+			voices.add(voiceNames);
+			
+			Button reset=new Button("Reset");
+			voices.add(reset);
+			reset.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					
+					
+					preference.setVoiceName("");
+					preference.setVoiceRate(1);
+					preference.setVoicePitch(1);
+					
+					updateVoiceNames();
+					
+					rateRange.setValue(10);
+					rateValue.setText("RATE:"+1);
+					pitchRange.setValue(10);
+					pitchValue.setText("PITCH:"+1);
+				}
+			});
+			
+			
+			HorizontalPanel settings=new HorizontalPanel();
+			add(settings);
+			rateValue=new Label();
+			rateValue.setWidth("60px");
+			
+			
+			settings.add(rateValue);
+			int drv=(int) (preference.getVoiceRate()*10);
+			rateValue.setText("RATE:"+drv);
+			rateRange = new HTML5InputRange(1, 50, drv);
+			rateRange.setWidth("100px");
+			rateRange.addMouseUpHandler(new MouseUpHandler() {
+				@Override
+				public void onMouseUp(MouseUpEvent event) {
+					double rv=(double)rateRange.getValue()/10;
+					rateValue.setText("RATE:"+rv);
+					preference.setVoiceRate(rv);
+				}
+			});
+			settings.add(rateRange);
+			
+			pitchValue=new Label();
+			pitchValue.setWidth("60px");
+			
+			
+			settings.add(pitchValue);
+			int dpv=(int) (preference.getVoicePitch()*10);
+			pitchValue.setText("PITCH:"+dpv);
+			pitchRange = new HTML5InputRange(1, 20, dpv);
+			pitchRange.setWidth("100px");
+			pitchRange.addMouseUpHandler(new MouseUpHandler() {
+				@Override
+				public void onMouseUp(MouseUpEvent event) {
+					double pv=(double)pitchRange.getValue()/10;
+					pitchValue.setText("PITCH:"+pv);
+					preference.setVoicePitch(pv);
+				}
+			});
+			settings.add(pitchRange);
+			
+			
+		}
+		public String getVoiceName(){
+			return voiceNames.getValue();
+		}
+		private void updateVoiceNames(){
+			if(ChromeTts.isAvaialbe()){
+				ChromeTts.getVoices(new GetVoiceHandler() {
+					
+					@Override
+					public void voices(JsArray<TtsVoice> voices) {
+						String dv=preference.getVoiceName();
+						List<String> names=new ArrayList<String>();
+						for(int i=0;i<voices.length();i++){
+							names.add(voices.get(i).getVoiceName());
+						}
+						String vname=names.get(0);
+						if(names.contains(dv)){
+							vname=dv;
+						}
+						voiceNames.setValue(vname);
+						voiceNames.setAcceptableValues(names);
+					}
+				});
+				}
 		}
 		
+		public double getPitch(){
+			return (double)pitchRange.getValue()/10;
+		}
+		public double getRate(){
+			return (double)rateRange.getValue()/10;
+		}
 	}
 
 }
