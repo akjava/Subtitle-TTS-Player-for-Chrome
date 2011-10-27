@@ -1,12 +1,14 @@
 *TODO
-bug 再生ボタンが選択前に起動してしまう
-起動時に自動読み込み 遅いので最後に
 
 *FUTURE
-Load画面がわかりにくい
-国際化
+Support selected index.
+Do International
 
 *DONE
+起動時に自動読み込み 遅いので最後に
+add Credits
+bug 再生ボタンが選択前に起動してしまう
+Load画面がわかりにくい
 再生コントロールのボタン管理	
 再生コントロール
 	再生

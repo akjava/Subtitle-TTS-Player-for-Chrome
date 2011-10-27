@@ -34,6 +34,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -75,13 +76,18 @@ public class SubPlayer implements EntryPoint,SubContainer {
 		
 		
 		tab = new TabLayoutPanel(1.5, Unit.EM);
-		tab.setHeight("600px");
+		tab.setHeight("500px");
 		
 		VerticalPanel root=new VerticalPanel();
 		root.setWidth("100%");
 		root.setHeight("100%");
 		//root.setHeight("200px");
-		RootLayoutPanel.get().add(tab);
+		DockLayoutPanel doc=new DockLayoutPanel(Unit.PX);
+		doc.addSouth(new HTMLPanel("<div align='center'>Subtitle TTS Player by <a href='http://www.akjava.com'>akjava.com</a></div>"), 40);
+		doc.add(tab);
+		RootLayoutPanel.get().add(doc);
+		
+		//RootLayoutPanel.get().add(new Label("hello"));
 		 tab.add(root, "PLAY");
 		 
 		 noSubtitle = new Label("Subtitle is empty.load from Load tab");
@@ -93,15 +99,17 @@ public class SubPlayer implements EntryPoint,SubContainer {
 		 loadPanel.setWidth("100%");
 		 loadPanel.setHeight("100%");
 		 tab.add(loadPanel, "LOAD");
-		 tab.selectTab(1);
+		
 		 loadPanel.setText(preference.getSrtText());
 		
+		 
+		 
 		itemPanel = new VerticalPanel();
 		itemPanel.setSpacing(8);
 		
 		itemPanelScroll = new ScrollPanel(itemPanel);
 		itemPanelScroll.setWidth("100%");
-		itemPanelScroll.setHeight("400px");
+		itemPanelScroll.setHeight("350px");
 		root.add(itemPanelScroll);
 		
 		/*
@@ -154,6 +162,12 @@ public class SubPlayer implements EntryPoint,SubContainer {
 		
 		//load data from preferences
 		//if empty load mode.
+		if(!loadPanel.getText().isEmpty()){
+			 loadSrt(preference.getSrtSelectIndex());
+		}else{
+			 tab.selectTab(1);
+		}
+		
 	}
 	
 	public class SRTItemPanel extends FocusPanel{
@@ -197,9 +211,12 @@ public class SubPlayer implements EntryPoint,SubContainer {
 		private TextArea textArea;
 
 		public LoadPanel(){
+		Label label=new Label("To load srt,copy and paste srt text from srt file and click load button.");
+		add(label);
+		setSpacing(4);
 		textArea = new TextArea();
-		textArea.setWidth("95%");
-		textArea.setHeight("300px");
+		textArea.setWidth("100%");
+		textArea.setHeight("350px");
 		add(textArea);
 		
 		HorizontalPanel bcontrol=new HorizontalPanel();
