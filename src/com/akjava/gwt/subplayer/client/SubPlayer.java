@@ -75,7 +75,7 @@ public class SubPlayer implements EntryPoint,SubContainer {
 		
 		
 		
-		tab = new TabLayoutPanel(1.5, Unit.EM);
+		tab = new TabLayoutPanel(2, Unit.EM);
 		tab.setHeight("500px");
 		
 		VerticalPanel root=new VerticalPanel();
