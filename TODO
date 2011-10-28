@@ -3,24 +3,3 @@ contain icon and manifest
 *FUTURE
 Support selected index.
 Do International
-
-*DONE
-起動時に自動読み込み 遅いので最後に
-add Credits
-bug 再生ボタンが選択前に起動してしまう
-Load画面がわかりにくい
-再生コントロールのボタン管理	
-再生コントロール
-	再生
-	AUTO
-	停止
-ボイス設定
-単体で再生可能に -  再生アイコン	
-時間表示	
-Indexの表示
-SRT読み込み時に遅い - glass + dialog
-SRT読み込みにローディングアニメーション -無理 止まる(それで我慢)
-クリア
-字幕がないときに表示
-CLEAR時もmodal化　- やっぱいらない。十分速い
-CLICKでIndexを取らない。nextボタンの動きが変 現在地を保存する

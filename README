@@ -1,0 +1,14 @@
+Subtitle-TTS-Player-for-Chrome
+
+Subtitle TTS is subtitle player with Chrome TTS(Text to Speech)
+you can copy&paste your srt subtitle and listen subtitle text.
+
+.srt is popular subtitle formas as used in Youtube.
+
+TTS App only works as Chrome Extension
+
+Based on Chrome-TTS-GWT
+https://github.com/akjava/Chrome-TTS-GWT
+
+APP URL
+http://chrome.google.com/webstore/detail/leblabpncahpanhpoemkclabakacjjmd
